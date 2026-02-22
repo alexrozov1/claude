@@ -3,170 +3,412 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Toggle Buttons Demo</title>
+  <title>Markdown Editor</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3248;
+      --accent: #6c63ff;
+      --accent2: #a78bfa;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --success: #34d399;
+      --radius: 12px;
     }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f6f8fa;
-      padding: 24px;
-    }
-
-    .editor-container {
-      background: #fff;
-      border: 1px solid #d0d7de;
-      border-radius: 6px;
-      overflow: hidden;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .toggle-bar {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
       display: flex;
-      padding: 8px 8px 0;
-      border-bottom: 1px solid #d0d7de;
-      background: #f6f8fa;
-      gap: 0;
+      flex-direction: column;
+    }
+
+    /* NAV */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      height: 64px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-logo {
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: var(--accent);
+      background: rgba(108, 99, 255, 0.08);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(108, 99, 255, 0.35);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 28px rgba(108, 99, 255, 0.55);
+      transform: translateY(-1px);
+    }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 72px 24px 48px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(108,99,255,0.12) 0%, transparent 70%);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      background: rgba(108, 99, 255, 0.15);
+      border: 1px solid rgba(108, 99, 255, 0.3);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent2);
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -1.5px;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 17px;
+      color: var(--text-muted);
+      max-width: 480px;
+      margin: 0 auto 32px;
+      line-height: 1.7;
+    }
+
+    /* EDITOR */
+    .editor-wrapper {
+      flex: 1;
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto 60px;
+      padding: 0 24px;
+    }
+
+    .editor-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    }
+
+    .editor-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .editor-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .editor-dots span {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .dot-red { background: #ff5f57; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #28c840; }
+
+    .toggle-group {
+      display: flex;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
     }
 
     .toggle-btn {
-      padding: 6px 16px;
-      border: 1px solid transparent;
-      border-bottom: none;
+      padding: 5px 18px;
+      border: none;
+      border-radius: 6px;
       background: transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
       cursor: pointer;
-      font-size: 14px;
-      border-radius: 6px 6px 0 0;
-      color: #57606a;
-      position: relative;
-      bottom: -1px;
-      transition: background 0.1s, color 0.1s;
-    }
-
-    .toggle-btn:hover {
-      background: #e8ecf0;
-      color: #24292f;
+      transition: all 0.18s;
     }
 
     .toggle-btn.active {
-      background: #fff;
-      border-color: #d0d7de;
-      color: #24292f;
-      font-weight: 500;
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(108, 99, 255, 0.4);
+    }
+
+    .toggle-btn:not(.active):hover {
+      color: var(--text);
+      background: var(--surface);
+    }
+
+    .editor-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success);
     }
 
     .panel {
       display: none;
-      padding: 16px;
-      min-height: 200px;
+      min-height: 360px;
     }
 
-    .panel.active {
-      display: block;
-    }
+    .panel.active { display: block; }
 
     #code-panel textarea {
       width: 100%;
-      min-height: 180px;
-      font-family: 'SFMono-Regular', Consolas, monospace;
-      font-size: 13px;
-      border: 1px solid #d0d7de;
-      border-radius: 6px;
-      padding: 10px;
-      resize: vertical;
+      min-height: 360px;
+      background: var(--surface);
+      color: var(--text);
+      font-family: 'SFMono-Regular', Consolas, 'Fira Code', monospace;
+      font-size: 14px;
+      line-height: 1.7;
+      border: none;
       outline: none;
-      color: #24292f;
-      line-height: 1.5;
-    }
-
-    #code-panel textarea:focus {
-      border-color: #0969da;
-      box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.15);
+      padding: 24px;
+      resize: vertical;
     }
 
     #preview-panel {
-      background: #fff;
-      color: #24292f;
-      line-height: 1.6;
-      min-height: 200px;
+      padding: 28px 32px;
+      color: var(--text);
+      line-height: 1.75;
+      min-height: 360px;
     }
 
     #preview-panel h1, #preview-panel h2, #preview-panel h3 {
-      margin: 0.5em 0 0.3em;
+      margin: 1em 0 0.4em;
+      font-weight: 700;
+      letter-spacing: -0.5px;
     }
 
-    #preview-panel p {
-      margin: 0.5em 0;
-    }
+    #preview-panel h1 { font-size: 26px; }
+    #preview-panel h2 { font-size: 20px; }
+    #preview-panel h3 { font-size: 17px; color: var(--accent2); }
+
+    #preview-panel p { margin: 0.6em 0; color: var(--text-muted); }
+
+    #preview-panel strong { color: var(--text); font-weight: 600; }
 
     #preview-panel code {
-      background: #f6f8fa;
-      padding: 2px 5px;
-      border-radius: 3px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 5px;
       font-family: 'SFMono-Regular', Consolas, monospace;
-      font-size: 85%;
+      font-size: 13px;
+      color: var(--accent2);
     }
 
     #preview-panel pre {
-      background: #f6f8fa;
-      padding: 12px;
-      border-radius: 6px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 18px 20px;
+      border-radius: 8px;
       overflow-x: auto;
+      margin: 12px 0;
     }
 
     #preview-panel pre code {
       background: none;
+      border: none;
       padding: 0;
+      color: var(--success);
     }
 
     #preview-panel blockquote {
-      border-left: 4px solid #d0d7de;
-      padding-left: 12px;
-      color: #57606a;
-      margin: 8px 0;
+      border-left: 3px solid var(--accent);
+      padding: 4px 0 4px 16px;
+      color: var(--text-muted);
+      margin: 12px 0;
+      font-style: italic;
     }
 
+    #preview-panel ul { padding-left: 20px; margin: 8px 0; }
+    #preview-panel li { margin: 4px 0; color: var(--text-muted); }
+
     .preview-empty {
-      color: #8c959f;
+      color: var(--text-muted);
       font-style: italic;
+      opacity: 0.6;
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 13px;
+      border-top: 1px solid var(--border);
+    }
+
+    footer a {
+      color: var(--accent2);
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
-  <div class="editor-container">
-    <div class="toggle-bar">
-      <button class="toggle-btn active" data-panel="code-panel" id="btn-code">Code</button>
-      <button class="toggle-btn" data-panel="preview-panel" id="btn-preview">Preview</button>
+
+  <nav>
+    <div class="nav-logo">✦ MarkEdit</div>
+    <ul class="nav-links">
+      <li><a href="#">Features</a></li>
+      <li><a href="#">Docs</a></li>
+      <li><a href="#">Pricing</a></li>
+      <li><a href="#">Blog</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="btn btn-ghost">Sign In</button>
+      <button class="btn btn-primary">Registration</button>
     </div>
+  </nav>
 
-    <div id="code-panel" class="panel active">
-      <textarea id="editor" placeholder="Enter markdown here...">## Hello, World!
+  <div class="hero">
+    <div class="hero-badge">✦ Now in Beta</div>
+    <h1>Write markdown,<br><span>beautifully</span></h1>
+    <p>A modern markdown editor with live preview. Clean, fast, and distraction-free.</p>
+  </div>
 
-This is a **toggle button** demo.
+  <div class="editor-wrapper">
+    <div class="editor-card">
+      <div class="editor-header">
+        <div class="editor-dots">
+          <span class="dot-red"></span>
+          <span class="dot-yellow"></span>
+          <span class="dot-green"></span>
+        </div>
+        <div class="toggle-group">
+          <button class="toggle-btn active" data-panel="code-panel">Code</button>
+          <button class="toggle-btn" data-panel="preview-panel">Preview</button>
+        </div>
+        <div class="editor-meta">
+          <span class="status-dot"></span> Live
+        </div>
+      </div>
 
-- Click **Preview** to see the rendered output
-- Click **Code** to return to the editor
+      <div id="code-panel" class="panel active">
+        <textarea id="editor" placeholder="Start writing markdown...">## Welcome to MarkEdit
 
-> Toggle buttons work correctly when each button activates its panel and deactivates the other.
+A **modern** markdown editor with *live preview* support.
+
+- Toggle between **Code** and **Preview** modes
+- Supports headings, bold, italic, lists and more
+- Clean dark interface with syntax highlighting
+
+> Great writing starts with great tools.
 
 \`\`\`js
-function toggle(panel) {
-  // show the selected panel
-  document.getElementById(panel).classList.add('active');
+function greet(name) {
+  return \`Hello, \${name}!\`;
 }
 \`\`\`
 </textarea>
-    </div>
+      </div>
 
-    <div id="preview-panel" class="panel">
-      <div id="preview-content"></div>
+      <div id="preview-panel" class="panel">
+        <div id="preview-content"></div>
+      </div>
     </div>
   </div>
+
+  <footer>
+    Built with ♥ by <a href="#">MarkEdit</a> &mdash; Open source & free forever.
+  </footer>
 
   <script>
     const buttons = document.querySelectorAll('.toggle-btn');
@@ -175,82 +417,50 @@ function toggle(panel) {
     const previewContent = document.getElementById('preview-content');
 
     function renderMarkdown(text) {
-      if (!text.trim()) {
-        return '<p class="preview-empty">Nothing to preview</p>';
-      }
+      if (!text.trim()) return '<p class="preview-empty">Nothing to preview</p>';
 
-      // Basic markdown rendering
       let html = text
-        // Escape HTML
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 
-      // Code blocks (must come before inline code)
-      html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
-        return `<pre><code>${code.trimEnd()}</code></pre>`;
-      });
-
-      // Inline code
+      html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) =>
+        `<pre><code>${code.trimEnd()}</code></pre>`);
       html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-      // Headers
       html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
       html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
       html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
-
-      // Bold and italic
       html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
       html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
       html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-
-      // Blockquotes
       html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
-
-      // Unordered list items
       html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
       html = html.replace(/(<li>[\s\S]+?<\/li>)/g, '<ul>$1</ul>');
-      // Collapse adjacent ul tags
       html = html.replace(/<\/ul>\s*<ul>/g, '');
 
-      // Paragraphs: wrap lines that are not already block elements
       const blockTags = /^<(h[1-6]|ul|ol|li|pre|blockquote)/;
-      html = html
-        .split('\n')
-        .map(line => {
-          if (line.trim() === '') return '';
-          if (blockTags.test(line.trim())) return line;
-          return `<p>${line}</p>`;
-        })
-        .join('\n');
+      html = html.split('\n').map(line => {
+        if (line.trim() === '') return '';
+        if (blockTags.test(line.trim())) return line;
+        return `<p>${line}</p>`;
+      }).join('\n');
 
       return html;
     }
 
     function switchPanel(targetPanelId) {
-      // Deactivate all buttons and panels
       buttons.forEach(btn => btn.classList.remove('active'));
       panels.forEach(panel => panel.classList.remove('active'));
 
-      // Activate the target button
-      const targetBtn = document.querySelector(`[data-panel="${targetPanelId}"]`);
-      if (targetBtn) targetBtn.classList.add('active');
+      document.querySelector(`[data-panel="${targetPanelId}"]`).classList.add('active');
+      document.getElementById(targetPanelId).classList.add('active');
 
-      // Activate the target panel
-      const targetPanel = document.getElementById(targetPanelId);
-      if (targetPanel) targetPanel.classList.add('active');
-
-      // If switching to preview, render the markdown
       if (targetPanelId === 'preview-panel') {
         previewContent.innerHTML = renderMarkdown(textarea.value);
       }
     }
 
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        switchPanel(btn.dataset.panel);
-      });
-    });
+    buttons.forEach(btn => btn.addEventListener('click', () => switchPanel(btn.dataset.panel)));
   </script>
 </body>
 </html>
