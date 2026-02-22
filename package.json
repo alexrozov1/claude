@@ -1,0 +1,10 @@
+{
+  "name": "toggle-buttons-app",
+  "version": "1.0.0",
+  "description": "Simple web app with working Preview/Code toggle buttons",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}
